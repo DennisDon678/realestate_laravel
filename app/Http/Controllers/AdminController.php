@@ -438,4 +438,49 @@ class AdminController extends Controller
 
         return back()->with("message", "Profile has been updated!");
     }
+
+    public function edit_user_form(Request $request)
+    {
+        $user = User::where('id', '=', $request->user_id)->get()->first();
+        $users = User::where('usertype', '=', 0)->paginate(10);
+        $investments = Investment::where('status', '=', 'active')->get();
+
+        return view('admin_dash.user_finance', compact('users', 'investments', 'user'));
+    }
+
+    public function edit_user(Request $request)
+    {
+        $user = User::where('email','=',$request->email)->get()->first();
+        $account = Account::where('user_id','=',$user->id)->get()->first();
+        
+        if ($request->action === 'fund'){
+            $balance = $account->balance + $request->amount;
+            $account->balance = $balance;
+            $account->save();
+            $notice = [
+                'user_id' => $user->id,
+                'title' => 'Your account was funded with USD' .  $request->amount.'.',
+                'description' => 'Your account was funded by our finance team, reason: '.$request->reason
+            ];
+            Notification::create($notice);
+
+            return redirect()->back()->with('message','User funded with USD'.$request->amount);
+        } elseif( $request->action === 'debit')
+        {
+            $balance = $account->balance - $request->amount;
+            $account->balance = $balance;
+            $account->save();
+            $notice = [
+                'user_id' => $user->id,
+                'title' => 'Your account was debited with USD' .  $request->amount . '.',
+                'description' => 'Your account was debited by our finance team, reason: ' . $request->reason
+            ];
+            Notification::create($notice);
+
+            return redirect()->back()->with('message', 'User debited with USD' . $request->amount);
+        }
+        else {
+            return redirect()->back()->with('error', 'Action not recognized');
+        }
+    }
 }

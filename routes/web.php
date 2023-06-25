@@ -135,3 +135,5 @@ Route::get('/admins/change_password',[AdminController::class,'change_password'])
 Route::post('/admins/change_password', [AdminController::class, 'renew'])->middleware('admin');
 Route::get('/admins/edit/profile',[AdminController::class,'edit_profile'])->middleware('admin');
 Route::post('/admins/edit/profile', [AdminController::class, 'save_profile'])->middleware('admin');
+Route::get('/admins/edit',[AdminController::class,'edit_user_form'])->middleware('admin');
+Route::post('/admins/edit', [AdminController::class, 'edit_user'])->middleware('admin');
